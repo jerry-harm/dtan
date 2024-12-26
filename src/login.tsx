@@ -18,6 +18,10 @@ class LoginStore extends ExternalStore<LoginSession | undefined> {
     const s = window.localStorage.getItem("session");
     if (s) {
       this.#session = JSON.parse(s);
+      // patch session
+      if (this.#session) {
+        this.#session.type ??= "nip7";
+      }
     }
   }
 
@@ -103,10 +107,10 @@ export function useLogin() {
   const system = useContext(SnortContext);
   return session
     ? {
-        type: session.type,
-        publicKey: session.publicKey,
-        builder: LoginState.getSigner(),
-        system,
-      }
+      type: session.type,
+      publicKey: session.publicKey,
+      builder: LoginState.getSigner(),
+      system,
+    }
     : undefined;
 }
