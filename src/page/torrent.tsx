@@ -19,11 +19,13 @@ export function TorrentPage() {
   const evState = location.state && "kind" in location.state ? (location.state as TaggedNostrEvent) : undefined;
 
   const rb = new RequestBuilder("torrent:event");
-  rb.withFilter()
-    .kinds([TorrentKind])
-    .link(parseNostrLink(unwrap(id)));
+  if (!evState) {
+    rb.withFilter()
+      .kinds([TorrentKind])
+      .link(parseNostrLink(unwrap(id)));
+  }
 
-  const evNew = useRequestBuilder(evState ? null : rb);
+  const evNew = useRequestBuilder(rb);
 
   const ev = evState ?? evNew?.at(0);
   if (!ev) return;

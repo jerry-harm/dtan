@@ -223,7 +223,6 @@ export function NewPage() {
             </label>
             <input
               type="text"
-              className="px-4 py-2 rounded-xl bg-neutral-800 focus-visible:outline-none"
               placeholder="Title of the torrent..."
               value={obj.name}
               onChange={(e) => setObj((o) => ({ ...o, name: e.target.value }))}
@@ -233,7 +232,6 @@ export function NewPage() {
             </label>
             <input
               type="text"
-              className="px-4 py-2 rounded-xl bg-neutral-800 focus-visible:outline-none"
               placeholder="Hash in hex format..."
               value={obj.btih}
               onChange={(e) => setObj((o) => ({ ...o, btih: e.target.value }))}
@@ -331,12 +329,7 @@ export function NewPage() {
                 }
               }
             })()}
-            <input
-              type="text"
-              className="p-4 rounded-xl bg-neutral-800 focus-visible:outline-none font-mono text-sm"
-              value={newLabelValue}
-              onChange={(e) => setNewLabelValue(e.target.value)}
-            />
+            <input type="text" value={newLabelValue} onChange={(e) => setNewLabelValue(e.target.value)} />
             <Button
               type="secondary"
               onClick={() => {
@@ -400,7 +393,6 @@ export function NewPage() {
               <input
                 type="text"
                 value={a.name}
-                className="flex-1 px-3 py-1 bg-neutral-800 rounded-xl focus-visible:outline-none"
                 placeholder="collection1/IMG_00001.jpg"
                 onChange={(e) =>
                   setObj((o) => ({
@@ -416,7 +408,6 @@ export function NewPage() {
               />
               <input
                 type="number"
-                className="px-3 py-1 bg-neutral-800 rounded-xl focus-visible:outline-none"
                 value={a.size}
                 min={0}
                 placeholder="69000"
@@ -465,7 +456,6 @@ export function NewPage() {
               <input
                 type="text"
                 value={a}
-                className="flex-1 px-3 py-1 bg-neutral-800 rounded-xl focus-visible:outline-none"
                 placeholder="udp://mytracker.net:3333"
                 onChange={(e) =>
                   setObj((o) => ({

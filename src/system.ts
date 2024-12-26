@@ -1,13 +1,5 @@
-import { FlatReqFilter, NostrEvent, NostrSystem, Optimizer, PowMiner, ReqFilter } from "@snort/system";
-import {
-  default as wasmInit,
-  expand_filter,
-  get_diff,
-  flat_merge,
-  compress,
-  schnorr_verify_event,
-  pow,
-} from "@snort/system-wasm";
+import { DefaultOptimizer, NostrEvent, NostrSystem, Optimizer, PowMiner } from "@snort/system";
+import { default as wasmInit, schnorr_verify_event, pow } from "@snort/system-wasm";
 import { WorkerRelayInterface } from "@snort/worker-relay";
 import WorkerVite from "@snort/worker-relay/src/worker?worker";
 
@@ -19,18 +11,7 @@ const workerScript = import.meta.env.DEV
 const workerRelay = new WorkerRelayInterface(workerScript);
 
 export const WasmOptimizer = {
-  expandFilter: (f: ReqFilter) => {
-    return expand_filter(f) as Array<FlatReqFilter>;
-  },
-  getDiff: (prev: Array<ReqFilter>, next: Array<ReqFilter>) => {
-    return get_diff(prev, next) as Array<FlatReqFilter>;
-  },
-  flatMerge: (all: Array<FlatReqFilter>) => {
-    return flat_merge(all) as Array<ReqFilter>;
-  },
-  compress: (all: Array<ReqFilter>) => {
-    return compress(all) as Array<ReqFilter>;
-  },
+  ...DefaultOptimizer,
   schnorrVerify: (ev) => {
     return schnorr_verify_event(ev);
   },

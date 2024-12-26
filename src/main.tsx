@@ -13,6 +13,7 @@ import { TorrentPage } from "./page/torrent";
 import { SearchPage } from "./page/search";
 import { System, initSystem } from "./system";
 import { RelaysPage } from "./page/relays";
+import LoginPage from "./page/login";
 
 const routes = [
   {
@@ -45,6 +46,10 @@ const routes = [
       {
         path: "/relays",
         element: <RelaysPage />,
+      },
+      {
+        path: "/login",
+        element: <LoginPage />,
       },
     ],
   },

@@ -1,13 +1,17 @@
 import { ExternalStore } from "@snort/shared";
-import { EventPublisher, Nip7Signer } from "@snort/system";
+import { EventPublisher, Nip46Signer, Nip7Signer, PrivateKeySigner } from "@snort/system";
 import { SnortContext } from "@snort/system-react";
 import { useContext, useSyncExternalStore } from "react";
 
 export interface LoginSession {
+  type: "nip7" | "nsec" | "nip46";
   publicKey: string;
+  privateKey?: string;
+  bunker?: string;
 }
 class LoginStore extends ExternalStore<LoginSession | undefined> {
   #session?: LoginSession;
+  #signer?: EventPublisher;
 
   constructor() {
     super();
@@ -21,15 +25,70 @@ class LoginStore extends ExternalStore<LoginSession | undefined> {
     return this.#session ? { ...this.#session } : undefined;
   }
 
-  login(pubkey: string) {
+  logout() {
+    this.#session = undefined;
+    this.#signer = undefined;
+    this.#save();
+  }
+
+  login(pubkey: string, type: LoginSession["type"] = "nip7") {
     this.#session = {
+      type: type ?? "nip7",
       publicKey: pubkey,
     };
     this.#save();
   }
 
+  loginPrivateKey(key: string) {
+    const s = new PrivateKeySigner(key);
+    this.#session = {
+      type: "nsec",
+      publicKey: s.getPubKey(),
+      privateKey: key,
+    };
+    this.#save();
+  }
+
+  loginBunker(url: string, localKey: string, remotePubkey: string) {
+    this.#session = {
+      type: "nip46",
+      publicKey: remotePubkey,
+      privateKey: localKey,
+      bunker: url,
+    };
+    this.#save();
+  }
+
+  getSigner() {
+    if (!this.#signer && this.#session) {
+      switch (this.#session.type) {
+        case "nsec":
+          this.#signer = new EventPublisher(new PrivateKeySigner(this.#session.privateKey!), this.#session.publicKey);
+          break;
+        case "nip46":
+          this.#signer = new EventPublisher(
+            new Nip46Signer(this.#session.bunker!, new PrivateKeySigner(this.#session.privateKey!)),
+            this.#session.publicKey,
+          );
+          break;
+        case "nip7":
+          this.#signer = new EventPublisher(new Nip7Signer(), this.#session.publicKey);
+          break;
+      }
+    }
+
+    if (this.#signer) {
+      return this.#signer;
+    }
+    throw "Signer not setup!";
+  }
+
   #save() {
-    window.localStorage.setItem("session", JSON.stringify(this.#session));
+    if (this.#session) {
+      window.localStorage.setItem("session", JSON.stringify(this.#session));
+    } else {
+      window.localStorage.removeItem("session");
+    }
     this.notifyChange();
   }
 }
@@ -44,8 +103,9 @@ export function useLogin() {
   const system = useContext(SnortContext);
   return session
     ? {
-        ...session,
-        builder: new EventPublisher(new Nip7Signer(), session.publicKey),
+        type: session.type,
+        publicKey: session.publicKey,
+        builder: LoginState.getSigner(),
         system,
       }
     : undefined;

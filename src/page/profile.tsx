@@ -4,6 +4,9 @@ import { ProfileImage } from "../element/profile-image";
 import { CachedMetadata, parseNostrLink } from "@snort/system";
 import { LatestTorrents } from "../element/trending";
 import { Text } from "../element/text";
+import { LoginState, useLogin } from "../login";
+import { Button } from "../element/button";
+import { hexToBech32 } from "@snort/shared";
 
 export function ProfilePage() {
   const params = useParams();
@@ -21,14 +24,25 @@ export function ProfilePage() {
 
 export function ProfileSection({ pubkey }: { pubkey: string }) {
   const profile = useUserProfile(pubkey);
+  const login = useLogin();
 
   return (
     <div className="flex items-center gap-4 mb-4">
       <ProfileImage pubkey={pubkey} size={200} />
-      <div className="flex flex-col gap-4">
-        <h2>{profile?.name}</h2>
-        <Text content={profile?.about ?? ""} tags={[]} />
+      <div className="flex flex-col gap-4 grow">
+        <h2>{(profile?.name?.length ?? 0) > 0 ? profile?.name : hexToBech32("npub", pubkey).slice(0, 12)}</h2>
+        {(profile?.about?.length ?? 0) > 0 && <Text content={profile?.about ?? ""} tags={[]} />}
         <WebSiteLink profile={profile} />
+        {login?.publicKey === pubkey && (
+          <Button
+            type="primary"
+            onClick={() => {
+              LoginState.logout();
+            }}
+          >
+            Logout
+          </Button>
+        )}
       </div>
     </div>
   );

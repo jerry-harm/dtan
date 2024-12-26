@@ -1,6 +1,6 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "../element/button";
-import { LoginSession, LoginState, useLogin } from "../login";
+import { LoginSession, useLogin } from "../login";
 import { ProfileImage } from "../element/profile-image";
 import { Search } from "../element/search";
 import { useRelays } from "../relays";
@@ -12,6 +12,7 @@ export function Layout() {
   const login = useLogin();
   const system = useContext(SnortContext);
   const { relays } = useRelays();
+  const navigate = useNavigate();
 
   async function updateRelayConnections(system: SystemInterface, relays: Record<string, RelaySettings>) {
     if (import.meta.env.VITE_SINGLE_RELAY) {
@@ -33,15 +34,6 @@ export function Layout() {
     updateRelayConnections(system, Object.fromEntries(relays.map((a) => [a, { read: true, write: true }])));
   }, [system, relays]);
 
-  async function DoLogin() {
-    if ("nostr" in window) {
-      const pubkey = await window.nostr?.getPublicKey();
-      if (pubkey) {
-        LoginState.login(pubkey);
-      }
-    }
-  }
-
   return (
     <div className="container mx-auto">
       <header className="flex gap-4 items-center pt-4 pb-6">
@@ -59,7 +51,7 @@ export function Layout() {
         {login ? (
           <LoggedInHeader login={login} />
         ) : (
-          <Button type="primary" onClick={DoLogin}>
+          <Button type="primary" onClick={() => navigate("/login")}>
             Login
           </Button>
         )}

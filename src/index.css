@@ -19,9 +19,11 @@ body {
 h1 {
   font-size: 32px;
 }
+
 h2 {
   font-size: 28px;
 }
+
 h3 {
   font-size: 21px;
 }
@@ -45,4 +47,10 @@ input[type="radio"] {
   white-space: nowrap;
   position: absolute;
   cursor: pointer;
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"] {
+  @apply px-4 py-2 rounded-xl bg-neutral-800 focus-visible:outline-none;
 }

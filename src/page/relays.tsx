@@ -26,7 +26,6 @@ export function RelaysPage() {
           type="text"
           value={newRelay}
           onChange={(e) => setNewRelay(e.target.value)}
-          className="px-4 py-2 rounded-xl bg-neutral-800 focus-visible:outline-none"
           placeholder="wss://myrelay.com"
         />
         <Button

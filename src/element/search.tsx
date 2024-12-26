@@ -15,7 +15,6 @@ export function Search(params: { term?: string; tags?: Array<string> }) {
     <input
       type="text"
       placeholder="Search..."
-      className="px-4 py-3 bg-neutral-800 rounded-full w-full focus-visible:outline-none"
       value={term}
       onChange={(e) => setTerm(e.target.value)}
       onKeyDown={(e) => {
