@@ -11,7 +11,7 @@ class RelaysStore extends ExternalStore<Array<string>> {
     if (loaded) {
       this.#relays = JSON.parse(loaded);
     } else {
-      this.#relays = ["wss://nos.lol/", "wss://relay.damus.io/", "wss://relay.nostr.band/"];
+      this.#relays = ["wss://nos.lol/", "wss://relay.damus.io/", "wss://relay.nostr.band/", "wss://relay.primal.net/", "wss://relay.snort.social/"];
       this.#save();
     }
   }

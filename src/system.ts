@@ -12,7 +12,7 @@ const workerRelay = new WorkerRelayInterface(workerScript);
 
 export const WasmOptimizer = {
   ...DefaultOptimizer,
-  schnorrVerify: (ev) => {
+  schnorrVerify: ev => {
     return schnorr_verify_event(ev);
   },
 } as Optimizer;

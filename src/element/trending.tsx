@@ -42,7 +42,7 @@ export function LatestTorrents({ author }: { author?: string }) {
         </Button>
         {filterEnabled && (
           <span className="text-sm text-neutral-400">
-            Filtering by Web of Trust (max distance: {maxDistance})
+            Filtering by Web of Trust (max distance: {maxDistance}, size: {wot.size()})
           </span>
         )}
       </div>

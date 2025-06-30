@@ -8,6 +8,7 @@ export interface WoT {
   followDistance: (pk: string) => number;
   followedByCount: (pk: string) => number;
   followedBy: (pk: string) => Set<string>;
+  size: () => number;
 }
 
 function wotOnSystem(system: SystemInterface) {
@@ -19,7 +20,7 @@ function wotOnSystem(system: SystemInterface) {
     followDistance: (pk: string) => sgi.getFollowDistance(pk),
     followedByCount: (pk: string) => sgi.followedByFriendsCount(pk),
     followedBy: (pk: string) => sgi.followedByFriends(pk),
-    instance: sgi,
+    size: () => sgi.size().users
   };
 }
 

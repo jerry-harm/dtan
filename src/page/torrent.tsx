@@ -1,6 +1,6 @@
 import { unwrap } from "@snort/shared";
 import { NostrLink, RequestBuilder, TaggedNostrEvent, parseNostrLink } from "@snort/system";
-import { useRequestBuilder } from "@snort/system-react";
+import { useRequestBuilder, useUserProfile } from "@snort/system-react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import { FormatBytes, TorrentKind } from "../const";
 import { ProfileImage } from "../element/profile-image";
@@ -12,6 +12,9 @@ import { NostrTorrent } from "../nostr-torrent";
 import TorrentFileList from "../element/file-tree";
 import CopyIcon from "../element/icon/copy";
 import MagnetIcon from "../element/icon/magnet";
+import ZapIcon from "../element/icon/zap";
+import { useState } from "react";
+import { SendZaps } from "../element/zap";
 
 export function TorrentPage() {
   const location = useLocation();
@@ -36,7 +39,9 @@ export function TorrentDetail({ item }: { item: TaggedNostrEvent }) {
   const login = useLogin();
   const navigate = useNavigate();
   const link = NostrLink.fromEvent(item);
+  const profile = useUserProfile(item.pubkey);
   const torrent = NostrTorrent.fromEvent(item);
+  const [sendZap, setShowZap] = useState(false);
 
   async function deleteTorrent() {
     const ev = await login?.builder?.delete(item.id);
@@ -78,6 +83,10 @@ export function TorrentDetail({ item }: { item: TaggedNostrEvent }) {
             {torrent.trackers.length > 0 && <div>Trackers: {torrent.trackers.length}</div>}
           </div>
           <div className="flex flex-col gap-2">
+            {(profile?.lud16 ?? false) && <Button type="zap" className="flex gap-1 items-center" onClick={() => setShowZap(s => !s)}>
+              <ZapIcon />
+              Zap
+            </Button>}
             <Link to={torrent.magnetLink}>
               <Button type="primary" className="flex gap-1 items-center">
                 <MagnetIcon />
@@ -102,6 +111,9 @@ export function TorrentDetail({ item }: { item: TaggedNostrEvent }) {
           </div>
         </div>
       </div>
+      {sendZap && <div className="bg-neutral-900 rounded-xl p-4">
+        <SendZaps lnurl={profile?.lud16 ?? ""} eTag={item.id} pubkey={item.pubkey} onFinish={() => setShowZap(false)} />
+      </div>}
       {item.content && (
         <>
           <h3 className="mt-2">Description</h3>

@@ -1,18 +1,20 @@
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import { Button } from "../element/button";
-import { LoginSession, useLogin } from "../login";
+import { useLogin } from "../login";
 import { ProfileImage } from "../element/profile-image";
 import { Search } from "../element/search";
 import { useRelays } from "../relays";
 import { useContext, useEffect } from "react";
 import { SnortContext } from "@snort/system-react";
-import { RelaySettings, SystemInterface } from "@snort/system";
+import { NostrLink, RelaySettings, SystemInterface } from "@snort/system";
+import { useFollowList } from "../follows";
 
 export function Layout() {
   const login = useLogin();
   const system = useContext(SnortContext);
   const { relays } = useRelays();
   const navigate = useNavigate();
+  useFollowList();
 
   async function updateRelayConnections(system: SystemInterface, relays: Record<string, RelaySettings>) {
     if (import.meta.env.VITE_SINGLE_RELAY) {
@@ -35,21 +37,21 @@ export function Layout() {
   }, [system, relays]);
 
   return (
-    <div className="container mx-auto">
+    <div className="mx-auto px-2">
       <header className="flex gap-4 items-center pt-4 pb-6">
         <Link to={"/"} className="flex gap-2 items-center">
           <img src="/logo_256.jpg" className="rounded-full" height={40} width={40} />
           <h1 className="font-bold uppercase">dtan.xyz</h1>
         </Link>
-        <div className="w-1/3">
+        <div className="w-1/3 max-sm:hidden">
           <Search />
         </div>
         <div className="grow"></div>
         <Link to="/relays">
           <Button type="secondary">Relays</Button>
         </Link>
-        {login ? (
-          <LoggedInHeader login={login} />
+        {login?.publicKey ? (
+          <LoggedInHeader pubkey={login.publicKey} />
         ) : (
           <Button type="primary" onClick={() => navigate("/login")}>
             Login
@@ -63,10 +65,11 @@ export function Layout() {
   );
 }
 
-function LoggedInHeader({ login }: { login: LoginSession }) {
+function LoggedInHeader({ pubkey }: { pubkey: string }) {
   return (
     <div className="flex items-center gap-2">
-      <ProfileImage pubkey={login.publicKey} />
+      <Link to={`/p/${NostrLink.publicKey(pubkey).encode()}`}>
+        <ProfileImage pubkey={pubkey} /></Link>
       <Link to="/new">
         <Button type="primary">+ Create</Button>
       </Link>

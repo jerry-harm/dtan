@@ -1,7 +1,7 @@
 import { ExternalStore } from "@snort/shared";
 import { EventPublisher, Nip46Signer, Nip7Signer, PrivateKeySigner } from "@snort/system";
 import { SnortContext } from "@snort/system-react";
-import { useContext, useSyncExternalStore } from "react";
+import { useContext, useEffect, useSyncExternalStore } from "react";
 
 export interface LoginSession {
   type: "nip7" | "nsec" | "nip46";
@@ -21,6 +21,10 @@ class LoginStore extends ExternalStore<LoginSession | undefined> {
       // patch session
       if (this.#session) {
         this.#session.type ??= "nip7";
+      }
+      if (this.#session !== undefined && this.#session.publicKey === undefined) {
+        console.warn("Invalid login session, missing pubkey");
+        this.#session = undefined;
       }
     }
   }
@@ -105,6 +109,13 @@ export function useLogin() {
     () => LoginState.snapshot(),
   );
   const system = useContext(SnortContext);
+  useEffect(() => {
+    if(session?.publicKey) {
+      const wot = system.config.socialGraphInstance;
+      wot.setRoot(session.publicKey);
+      console.log("WoT root set to: ", session.publicKey);
+    }
+  }, [session, system]);
   return session
     ? {
       type: session.type,

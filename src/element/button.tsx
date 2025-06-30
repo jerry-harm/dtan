@@ -3,7 +3,7 @@ import { HTMLProps, forwardRef, useState } from "react";
 
 type ButtonProps = Omit<HTMLProps<HTMLButtonElement>, "onClick" | "small"> & {
   onClick?: (e: React.MouseEvent<HTMLButtonElement>) => Promise<void> | void;
-  type: "primary" | "secondary" | "danger";
+  type: "primary" | "secondary" | "danger" | "zap";
   small?: boolean;
 };
 
@@ -21,13 +21,26 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) =>
     }
   }
 
+  function matchType(type: ButtonProps["type"]) {
+    switch (type) {
+      case "danger": {
+        return "bg-red-900 hover:bg-red-600";
+      }
+      case "primary": {
+        return "bg-indigo-800 hover:bg-indigo-700";
+      }
+      case "zap": {
+        return "bg-orange-500 hover:bg-orange-400";
+      }
+      default: {
+        return "bg-neutral-800 hover:bg-neutral-700";
+      }
+    }
+  }
+
   const colorScheme = props.disabled
     ? "bg-neutral-900 text-neutral-600 border border-solid border-neutral-700"
-    : props.type == "danger"
-      ? "bg-red-900 hover:bg-red-600"
-      : props.type == "primary"
-        ? "bg-indigo-800 hover:bg-indigo-700"
-        : "bg-neutral-800 hover:bg-neutral-700";
+    : matchType(props.type)
 
   return (
     <button

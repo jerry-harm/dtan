@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { NostrLink, RequestBuilder, TaggedNostrEvent, parseZap } from "@snort/system";
+import { NostrLink, ParsedZap, RequestBuilder, TaggedNostrEvent, parseZap } from "@snort/system";
 import { useRequestBuilder } from "@snort/system-react";
 import { unwrap } from "@snort/shared";
 
@@ -11,19 +11,8 @@ import { TorrentCommentKind, ZapKind, formatSats } from "../const";
 
 // Types for combined interactions
 type CommentInteraction = TaggedNostrEvent & { type: 'comment' };
-type ZapInteraction = TaggedNostrEvent & { type: 'zap'; amount: number };
+type ZapInteraction = TaggedNostrEvent & { type: 'zap'; zap: ParsedZap };
 type Interaction = CommentInteraction | ZapInteraction;
-
-// Helper function to extract sats amount from zap receipt using parseZap
-function getZapAmount(zapEvent: TaggedNostrEvent): number {
-  try {
-    const zapInfo = parseZap(zapEvent);
-    return zapInfo?.amount ?? 0;
-  } catch (e) {
-    console.warn("Failed to parse zap amount:", e);
-    return 0;
-  }
-}
 
 export function Comments({ link }: { link: NostrLink }) {
   // Fetch both comments and zaps in a single filter
@@ -33,15 +22,20 @@ export function Comments({ link }: { link: NostrLink }) {
 
   // Separate comments and zaps
   const comments = interactions.filter(event => event.kind === TorrentCommentKind);
-  const zaps = interactions.filter(event => event.kind === ZapKind);
+  const zaps = interactions.filter(event => event.kind === ZapKind).map((z) => {
+    return {
+      zap: parseZap(z),
+      event: z
+    }
+  });
 
   // Calculate total zaps
-  const totalZaps = zaps.reduce((total, zap) => total + getZapAmount(zap), 0);
+  const totalZaps = zaps.reduce((total, zap) => total + (zap.zap.amount ?? 0), 0);
 
   // Combine and sort all interactions by timestamp
   const allInteractions: Interaction[] = [
     ...comments.map(c => ({ ...c, type: 'comment' as const })),
-    ...zaps.map(z => ({ ...z, type: 'zap' as const, amount: getZapAmount(z) }))
+    ...zaps.map(z => ({ ...z.event, type: 'zap' as const, zap: z.zap }))
   ].sort((a, b) => (a.created_at > b.created_at ? -1 : 1));
 
   return (
@@ -55,12 +49,12 @@ export function Comments({ link }: { link: NostrLink }) {
       )}
       {allInteractions.map((item, i) => (
         <div key={i} className={`flex flex-col gap-2 rounded-lg p-4 ${item.type === 'zap' ? 'bg-orange-900/20 border border-orange-500/30' : 'bg-neutral-900'}`}>
-          <ProfileImage pubkey={item.pubkey} withName={true}>
+          <ProfileImage pubkey={item.type === "zap" ? (item.zap.sender ?? item.pubkey) : item.pubkey} withName={true}>
             <div className="flex items-center gap-2">
               <span className="text-neutral-400 text-sm">{new Date(item.created_at * 1000).toLocaleString()}</span>
               {item.type === 'zap' && (
                 <span className="text-orange-400 text-sm font-semibold">
-                  ⚡ {formatSats((item as ZapInteraction).amount)} sats
+                  ⚡ {formatSats((item as ZapInteraction).zap.amount)} sats
                 </span>
               )}
             </div>
