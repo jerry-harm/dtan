@@ -8,7 +8,7 @@ import * as bencode from "../bencode";
 import { sha1 } from "@noble/hashes/sha1";
 import { bytesToHex } from "@noble/hashes/utils";
 import { Link, useNavigate } from "react-router-dom";
-import { NostrLink } from "@snort/system";
+import { EventExt, NostrLink } from "@snort/system";
 import { NostrTorrent, TorrentTag } from "../nostr-torrent";
 
 async function openFile(): Promise<File | undefined> {
@@ -73,6 +73,7 @@ export function NewPage() {
   const [newLabelType, setNewLabelType] = useState<TorrentTag["type"]>("imdb");
   const [newLabelSubType, setNewLabelSubType] = useState("");
   const [newLabelValue, setNewLabelValue] = useState("");
+  const [error, setError] = useState<string>();
 
   const [obj, setObj] = useState<TorrentEntry>({
     name: "",
@@ -93,7 +94,11 @@ export function NewPage() {
       console.debug(torrent);
       const dec = new TextDecoder();
       const info = torrent["info"] as {
-        files?: Array<{ length: number; path: Array<Uint8Array> }>;
+        files?: Array<{
+          length: number;
+          path: Array<Uint8Array>;
+          attr?: Uint8Array;
+        }>;
         length: number;
         name: Uint8Array;
       };
@@ -102,15 +107,24 @@ export function NewPage() {
         dec.decode(a[0]),
       );
 
+      let fileListFiltered = info.files?.filter((a) => a.attr == undefined);
+
+      if ((fileListFiltered?.length ?? 0) > 100) {
+        const remaining = fileListFiltered!.slice(100);
+        fileListFiltered = fileListFiltered!.slice(0, 99);
+        fileListFiltered.push({ length: remaining?.reduce((acc, v) => acc += v.length, 0), path: [new TextEncoder().encode("Remaining")] });
+        console.debug("Truncated file list, too long!");
+      }
+
       setObj({
         name: dec.decode(info.name),
         desc: dec.decode(torrent["comment"] as Uint8Array | undefined) ?? "",
         btih: bytesToHex(sha1(infoBuf)),
         tcat: "",
-        files: (info.files ?? [{ length: info.length, path: [info.name] }]).map((a) => ({
+        files: fileListFiltered?.map((a) => ({
           size: a.length,
           name: a.path.map((b) => dec.decode(b)).join("/"),
-        })),
+        })) ?? [],
         trackers: dedupe([annouce, ...(announceList ?? [])]),
         externalLabels: [],
       });
@@ -119,29 +133,37 @@ export function NewPage() {
 
   async function publish() {
     if (!login) return;
-    const torrent = new NostrTorrent(
-      undefined,
-      obj.name,
-      obj.desc,
-      obj.btih,
-      unixNow(),
-      obj.files,
-      obj.trackers,
-      obj.externalLabels.concat([
-        {
-          type: "tcat",
-          value: obj.tcat,
-        },
-      ]),
-    );
-    const ev = torrent.toEvent(login.publicKey);
-    ev.tags.push(["alt", `${obj.name}\nTorrent published on https://dtan.xyz`]);
-    console.debug(ev);
+    try {
+      const torrent = new NostrTorrent(
+        undefined,
+        obj.name,
+        obj.desc,
+        obj.btih,
+        unixNow(),
+        obj.files,
+        obj.trackers,
+        obj.externalLabels.concat([
+          {
+            type: "tcat",
+            value: obj.tcat,
+          },
+        ]),
+      );
+      const ev = torrent.toEvent(login.publicKey);
+      ev.tags.push(["alt", `${obj.name}\nTorrent published on https://dtan.xyz`]);
+      ev.id = EventExt.createId(ev); //recompute ID
+      console.debug(ev);
 
-    if (ev) {
-      const evSigned = await login.builder.signer.sign(ev);
-      login.system.BroadcastEvent(evSigned);
-      navigate(`/e/${NostrLink.fromEvent(evSigned).encode()}`);
+      if (ev) {
+        const evSigned = await login.builder.signer.sign(ev);
+        await login.system.BroadcastEvent(evSigned);
+        navigate(`/e/${NostrLink.fromEvent(evSigned).encode()}`);
+      }
+    } catch (e) {
+      console.error(e);
+      if (e instanceof Error) {
+        setError(e.message);
+      }
     }
   }
 
@@ -498,6 +520,7 @@ export function NewPage() {
         <Button className="mt-4" type="primary" disabled={!entryIsValid(obj)} onClick={publish}>
           Publish
         </Button>
+        {error && <div className="text-red-500">{error}</div>}
       </form>
     </>
   );
