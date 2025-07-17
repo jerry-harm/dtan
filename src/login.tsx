@@ -110,10 +110,10 @@ export function useLogin() {
   );
   const system = useContext(SnortContext);
   useEffect(() => {
-    if(session?.publicKey) {
+    if (session?.publicKey) {
       const wot = system.config.socialGraphInstance;
-      wot.setRoot(session.publicKey);
       console.log("WoT root set to: ", session.publicKey);
+      wot.setRoot(session.publicKey);
     }
   }, [session, system]);
   return session
