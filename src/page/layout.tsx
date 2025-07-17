@@ -48,11 +48,11 @@ export function Layout() {
           <Search />
         </div>
         <div className="grow"></div>
-        <Link to="https://github.com/v0l/dtan" >
+        <a href="https://github.com/v0l/dtan" target="_blank">
           <Button type="secondary">
               <GithubIcon/>
           </Button>
-        </Link>
+        </a>
         <Link to="/relays">
           <Button type="secondary">Relays</Button>
         </Link>
