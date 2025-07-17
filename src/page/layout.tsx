@@ -8,6 +8,7 @@ import { useContext, useEffect } from "react";
 import { SnortContext } from "@snort/system-react";
 import { NostrLink, RelaySettings, SystemInterface } from "@snort/system";
 import { useFollowList } from "../follows";
+import GithubIcon from "../element/icon/github";
 
 export function Layout() {
   const login = useLogin();
@@ -47,6 +48,11 @@ export function Layout() {
           <Search />
         </div>
         <div className="grow"></div>
+        <Link to="https://github.com/v0l/dtan" >
+          <Button type="secondary">
+              <GithubIcon/>
+          </Button>
+        </Link>
         <Link to="/relays">
           <Button type="secondary">Relays</Button>
         </Link>
