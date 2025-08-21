@@ -5,6 +5,8 @@ import WorkerVite from "@snort/worker-relay/src/worker?worker";
 
 import WasmPath from "@snort/system-wasm/pkg/system_wasm_bg.wasm?url";
 
+const hasWasm = "WebAssembly" in globalThis;
+
 const workerScript = import.meta.env.DEV
   ? new URL("@snort/worker-relay/dist/esm/worker.mjs", import.meta.url)
   : new WorkerVite();
@@ -25,8 +27,8 @@ export class WasmPowWorker implements PowMiner {
 }
 
 export const System = new NostrSystem({
-  cachingRelay: workerRelay,
-  optimizer: WasmOptimizer,
+  cachingRelay: hasWasm ? workerRelay : undefined,
+  optimizer: hasWasm ? WasmOptimizer : DefaultOptimizer,
   buildFollowGraph: true,
 });
 
@@ -35,14 +37,13 @@ export async function initSystem() {
   if (didInit) return;
   didInit = true;
 
-  const tasks = [
-    wasmInit(WasmPath),
-    workerRelay.init({
+  if (hasWasm) {
+    await wasmInit(WasmPath);
+    await workerRelay.init({
       databasePath: "dtan.db",
       insertBatchSize: 100,
-    }),
-    System.Init(),
-  ];
+    })
+  }
 
-  await Promise.all(tasks);
+  await System.Init();
 }

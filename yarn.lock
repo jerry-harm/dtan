@@ -1920,14 +1920,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@snort/system-react@npm:^1.6.7":
-  version: 1.6.7
-  resolution: "@snort/system-react@npm:1.6.7"
+"@snort/system-react@npm:^1.6.8":
+  version: 1.6.8
+  resolution: "@snort/system-react@npm:1.6.8"
   dependencies:
     "@snort/shared": "npm:^1.0.17"
-    "@snort/system": "npm:^1.6.7"
+    "@snort/system": "npm:^1.6.8"
     react: "npm:^18.2.0"
-  checksum: 10c0/4fb77bb309f549726c8ebe1bf06a7cb05c70b5ead3d2fcfdf9d7bb59df858ce4ce285c31ca4bcfa7758bd5f5caaf99d6abf02e8329cf4b464f873a11714ea010
+  checksum: 10c0/7979f8efff617e4f07da4a77f090155a8067caeadd462f647f7c536a090c97114f085f37c6949f7fe8fa8cc7580d74699ecf9b999de9469af83f2f51acf72ea4
   languageName: node
   linkType: hard
 
@@ -1938,9 +1938,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@snort/system@npm:^1.6.7":
-  version: 1.6.7
-  resolution: "@snort/system@npm:1.6.7"
+"@snort/system@npm:^1.6.8":
+  version: 1.6.8
+  resolution: "@snort/system@npm:1.6.8"
   dependencies:
     "@noble/ciphers": "npm:^0.6.0"
     "@noble/curves": "npm:^1.4.0"
@@ -1955,7 +1955,7 @@ __metadata:
     nostr-social-graph: "npm:^1.0.25"
     uuid: "npm:^9.0.0"
     ws: "npm:^8.14.0"
-  checksum: 10c0/02915124a02e06b06efaa0b0de10b54e6e481dc54d34e4bbf552dfa2adc696639bdf3fd16a1ff667cd15988d33cb52d3639466578e7b0759ae7610676dbff1d4
+  checksum: 10c0/dcfe30db9f8ab0b33b9c8d9e51a99ff27e0fbd52409fd6db8851872cbe96a1518271696a25d7d7bc681171d7eca23aa122981cfdd2ca42149e389eb54b5928b0
   languageName: node
   linkType: hard
 
@@ -3021,8 +3021,8 @@ __metadata:
   dependencies:
     "@noble/hashes": "npm:^1.8.0"
     "@snort/shared": "npm:^1.0.17"
-    "@snort/system": "npm:^1.6.7"
-    "@snort/system-react": "npm:^1.6.7"
+    "@snort/system": "npm:^1.6.8"
+    "@snort/system-react": "npm:^1.6.8"
     "@snort/system-wasm": "npm:^1.0.5"
     "@snort/worker-relay": "npm:^1.4.1"
     "@tailwindcss/postcss": "npm:^4.1.11"

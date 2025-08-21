@@ -12,8 +12,8 @@
   "dependencies": {
     "@noble/hashes": "^1.8.0",
     "@snort/shared": "^1.0.17",
-    "@snort/system": "^1.6.7",
-    "@snort/system-react": "^1.6.7",
+    "@snort/system": "^1.6.8",
+    "@snort/system-react": "^1.6.8",
     "@snort/system-wasm": "^1.0.5",
     "@snort/worker-relay": "^1.4.1",
     "classnames": "^2.5.1",
