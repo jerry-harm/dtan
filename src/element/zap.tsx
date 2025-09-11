@@ -3,7 +3,7 @@ import { LNURL } from "@snort/shared";
 import { EventPublisher, NostrEvent, PrivateKeySigner } from "@snort/system";
 import { useLogin } from "../login";
 import { useRelays } from "../relays";
-import { formatSats } from "../const";
+import { formatSats, TorrentKind } from "../const";
 import { Button } from "./button";
 import QrCode from "./qr";
 import classNames from "classnames";
@@ -81,6 +81,7 @@ export function SendZaps({ lnurl, pubkey, aTag, eTag, targetName, onFinish, onTa
         if (isAnon) {
           eb.tag(["anon", ""]);
         }
+        eb.tag(["K", TorrentKind.toString()]);
         return eb;
       });
     }
