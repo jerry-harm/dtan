@@ -43,6 +43,7 @@ export function TorrentDetail({ item }: { item: TaggedNostrEvent }) {
   const torrent = NostrTorrent.fromEvent(item);
   const [sendZap, setShowZap] = useState(false);
   const [showFileList, setShowFileList] = useState(false);
+  const [expandDescription, setExpandDescription] = useState(false);
 
   async function deleteTorrent() {
     const ev = await login?.builder?.delete(item.id);
@@ -126,9 +127,23 @@ export function TorrentDetail({ item }: { item: TaggedNostrEvent }) {
       {item.content && (
         <>
           <h3 className="mt-2">Description</h3>
-          <pre className="font-mono text-sm bg-neutral-900 p-4 rounded-lg overflow-y-auto">
-            <Text content={item.content} tags={item.tags} wrap={false}></Text>
-          </pre>
+          <div className="bg-neutral-900 p-4 rounded-lg">
+            <pre 
+              className={`font-mono text-sm overflow-y-auto ${
+                !expandDescription ? 'max-h-32 overflow-hidden' : ''
+              }`}
+            >
+              <Text content={item.content} tags={item.tags} wrap={false}></Text>
+            </pre>
+            {item.content.length > 200 && (
+              <button
+                className="mt-2 text-blue-400 hover:text-blue-300 text-sm"
+                onClick={() => setExpandDescription(!expandDescription)}
+              >
+                {expandDescription ? 'Show less' : 'Show more'}
+              </button>
+            )}
+          </div>
         </>
       )}
       {sendZap && (
