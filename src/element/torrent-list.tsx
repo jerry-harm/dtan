@@ -10,7 +10,7 @@ import IMDB from "../logo/IMDb_logo.svg";
 import { Button } from "./button";
 import useWoT from "../wot";
 
-export function TorrentList({ items, showAll = false }: { items: Array<TaggedNostrEvent>; showAll?: boolean }) {
+export function TorrentList({ items, showAll = false, currentInfoHash }: { items: Array<TaggedNostrEvent>; showAll?: boolean; currentInfoHash?: string }) {
   const [pageSize, setPageSize] = useState(showAll ? 100_000 : 50);
   const [pageNum, setPageNum] = useState(0);
   const [filterEnabled, setFilterEnabled] = useState(false);
@@ -60,7 +60,7 @@ export function TorrentList({ items, showAll = false }: { items: Array<TaggedNos
         </thead>
         <tbody>
           {filteredTorrents.slice(pageNum * pageSize, pageNum * pageSize + pageSize).map((a) => (
-            <TorrentTableEntry item={a} key={a.id} />
+            <TorrentTableEntry item={a} key={a.id} currentInfoHash={currentInfoHash} />
           ))}
         </tbody>
       </table>
@@ -128,8 +128,9 @@ function TagListEntry({ tags, startIndex, tag }: { tags: string[]; startIndex: n
   );
 }
 
-function TorrentTableEntry({ item }: { item: TaggedNostrEvent }) {
+function TorrentTableEntry({ item, currentInfoHash }: { item: TaggedNostrEvent; currentInfoHash?: string }) {
   const torrent = NostrTorrent.fromEvent(item);
+  const isDuplicate = currentInfoHash && torrent.infoHash === currentInfoHash;
 
   return (
     <tr className="hover:bg-indigo-800">
@@ -137,9 +138,16 @@ function TorrentTableEntry({ item }: { item: TaggedNostrEvent }) {
         <TagList torrent={torrent} />
       </td>
       <td className="break-words">
-        <Link to={`/e/${NostrLink.fromEvent(item).encode()}`} state={item}>
-          {torrent.title?.trim() || "Untitled"}
-        </Link>
+        <div className="flex items-center gap-2">
+          {isDuplicate && (
+            <span className="bg-red-200 text-red-800 text-xs px-2 py-1 rounded font-bold uppercase">
+              duplicate:{item.id.slice(-8)}
+            </span>
+          )}
+          <Link to={`/e/${NostrLink.fromEvent(item).encode()}`} state={item}>
+            {torrent.title?.trim() || "Untitled"}
+          </Link>
+        </div>
       </td>
       <td>
         {torrent.imdb && (

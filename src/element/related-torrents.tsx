@@ -26,7 +26,7 @@ export default function RelatedTorrents({ torrent }: { torrent: NostrTorrent }) 
   return (
     <div className="flex flex-col gap-4 bg-neutral-900 p-4 rounded-lg">
       <h3>Related Torrents</h3>
-      <TorrentList items={data} showAll={true} />
+      <TorrentList items={data} showAll={true} currentInfoHash={torrent.infoHash} />
     </div>
   );
 }
