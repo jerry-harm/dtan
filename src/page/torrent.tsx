@@ -15,6 +15,8 @@ import MagnetIcon from "../element/icon/magnet";
 import ZapIcon from "../element/icon/zap";
 import { useState } from "react";
 import { SendZaps } from "../element/zap";
+import { TorrentTagElement } from "../element/torrent-tag";
+import RelatedTorrents from "../element/related-torrents";
 
 export function TorrentPage() {
   const location = useLocation();
@@ -38,7 +40,6 @@ export function TorrentPage() {
 export function TorrentDetail({ item }: { item: TaggedNostrEvent }) {
   const login = useLogin();
   const navigate = useNavigate();
-  const link = NostrLink.fromEvent(item);
   const profile = useUserProfile(item.pubkey);
   const torrent = NostrTorrent.fromEvent(item);
   const [sendZap, setShowZap] = useState(false);
@@ -51,69 +52,59 @@ export function TorrentDetail({ item }: { item: TaggedNostrEvent }) {
     }
   }
 
-  return (
-    <div className="flex flex-col gap-4 pb-8">
-      <div className="text-2xl">{torrent.title}</div>
-      <div className="flex flex-col gap-2 bg-neutral-900 p-4 rounded-lg">
-        <ProfileImage pubkey={item.pubkey} withName={true} />
-        <div className="flex flex-row">
-          <div className="flex flex-col gap-2 flex-grow">
-            <div>Size: {FormatBytes(torrent.totalSize)}</div>
-            <div>Uploaded: {new Date(torrent.publishedAt * 1000).toLocaleString()}</div>
-            <div className="flex items-center gap-2">
-              Tags:{" "}
-              <div className="flex gap-2">
-                {torrent.tags.map((a, i) => {
-                  if (a.type === "generic") {
-                    return (
-                      <div key={i} className="rounded-2xl py-1 px-4 bg-indigo-800 hover:bg-indigo-700">
-                        <Link to={`/search/?tags=${a.value}`}>#{a.value}</Link>
-                      </div>
-                    );
-                  } else {
-                    return (
-                      <div key={i} className="rounded-2xl py-1 px-4 bg-indigo-800 hover:bg-indigo-700">
-                        <Link to={`/search/?i=${a.type}:${a.value}`}>#{a.value}</Link>
-                      </div>
-                    );
-                  }
-                })}
-              </div>
+  function detailSection() {
+    return (
+      <div className="bg-neutral-900 p-4 rounded-lg flex flex-row">
+        <div className="flex flex-col gap-2 flex-grow">
+          <div>Size: {FormatBytes(torrent.totalSize)}</div>
+          <div>Uploaded: {new Date(torrent.publishedAt * 1000).toLocaleString()}</div>
+          <div className="flex items-center gap-2">
+            Tags:{" "}
+            <div className="flex gap-2 items-center">
+              {torrent.tags.map((a) => (
+                <TorrentTagElement tag={a} />
+              ))}
             </div>
-            {torrent.trackers.length > 0 && <div>Trackers: {torrent.trackers.length}</div>}
           </div>
-          <div className="flex flex-col gap-2">
-            {(profile?.lud16 ?? false) && <Button type="zap" className="flex gap-1 items-center" onClick={() => setShowZap(s => !s)}>
+          {torrent.trackers.length > 0 && <div>Trackers: {torrent.trackers.length}</div>}
+        </div>
+        <div className="flex flex-col gap-2">
+          {(profile?.lud16 ?? false) && (
+            <Button type="zap" className="flex gap-1 items-center" onClick={() => setShowZap((s) => !s)}>
               <ZapIcon />
               Zap
-            </Button>}
-            <Link to={torrent.magnetLink}>
-              <Button type="primary" className="flex gap-1 items-center">
-                <MagnetIcon />
-                Get this torrent
-              </Button>
-            </Link>
-            <Button
-              type="primary"
-              onClick={async () => {
-                await navigator.clipboard.writeText(JSON.stringify(item, undefined, 2));
-              }}
-              className="flex gap-1 items-center"
-            >
-              <CopyIcon />
-              Copy JSON
             </Button>
-            {item.pubkey == login?.publicKey && (
-              <Button type="danger" onClick={deleteTorrent}>
-                Delete
-              </Button>
-            )}
-          </div>
+          )}
+          <Link to={torrent.magnetLink}>
+            <Button type="primary" className="flex gap-1 items-center">
+              <MagnetIcon />
+              Get this torrent
+            </Button>
+          </Link>
+          {item.pubkey == login?.publicKey && (
+            <Button type="danger" onClick={deleteTorrent}>
+              Delete
+            </Button>
+          )}
         </div>
       </div>
-      {sendZap && <div className="bg-neutral-900 rounded-xl p-4">
-        <SendZaps lnurl={profile?.lud16 ?? ""} eTag={item.id} pubkey={item.pubkey} onFinish={() => setShowZap(false)} />
-      </div>}
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-4 pb-8">
+      <div className="flex gap-2 items-center">
+        <ProfileImage pubkey={item.pubkey} withName={true} />
+        <div className="text-2xl">{torrent.title}</div>
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+        {detailSection()}
+        <div className="bg-neutral-900 p-4 rounded-lg">
+          <h3 className="mb-2">File List</h3>
+          <TorrentFileList torrent={torrent} />
+        </div>
+      </div>
+      <RelatedTorrents torrent={torrent} />
       {item.content && (
         <>
           <h3 className="mt-2">Description</h3>
@@ -122,12 +113,31 @@ export function TorrentDetail({ item }: { item: TaggedNostrEvent }) {
           </pre>
         </>
       )}
-      <h3 className="mt-2">Files</h3>
-      <div className="flex flex-col gap-1 bg-neutral-900 p-4 rounded-lg">
-        <TorrentFileList torrent={torrent} />
+      {sendZap && (
+        <div className="bg-neutral-900 rounded-xl p-4">
+          <SendZaps
+            lnurl={profile?.lud16 ?? ""}
+            eTag={item.id}
+            pubkey={item.pubkey}
+            onFinish={() => setShowZap(false)}
+          />
+        </div>
+      )}
+      <h3>Comments</h3>
+      <Comments ev={item} />
+      <h3>Other Links</h3>
+      <div className="flex items-center gap-4">
+        <Button
+          type="secondary"
+          onClick={async () => {
+            await navigator.clipboard.writeText(JSON.stringify(item, undefined, 2));
+          }}
+          className="flex gap-1 items-center"
+        >
+          <CopyIcon />
+          Copy JSON
+        </Button>
       </div>
-      <h3 className="mt-2">Comments</h3>
-      <Comments link={link} />
     </div>
   );
 }

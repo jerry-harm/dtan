@@ -118,10 +118,10 @@ export function useLogin() {
   }, [session, system]);
   return session
     ? {
-      type: session.type,
-      publicKey: session.publicKey,
-      builder: LoginState.getSigner(),
-      system,
-    }
+        type: session.type,
+        publicKey: session.publicKey,
+        builder: LoginState.getSigner(),
+        system,
+      }
     : undefined;
 }

@@ -32,5 +32,5 @@ NIP-35 defines the event format as:
 
 ### Custom scraper relay
 
-A relay which automatically clones torrent events from other relays. 
+A relay which automatically clones torrent events from other relays.
 Simple docker image which can easily be deployed anywhere and will add another replica of torrent metadata.

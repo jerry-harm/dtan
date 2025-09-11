@@ -1,5 +1,5 @@
 import { unixNow } from "@snort/shared";
-import { EventExt, NostrEvent, NotSignedNostrEvent } from "@snort/system";
+import { EventExt, NostrEvent, NotSignedNostrEvent, TaggedNostrEvent } from "@snort/system";
 import { Trackers } from "./const";
 
 export interface TorrentFile {
@@ -13,6 +13,8 @@ export interface TorrentTag {
 }
 
 export class NostrTorrent {
+  #event?: TaggedNostrEvent;
+
   constructor(
     readonly id: string | undefined,
     readonly title: string,
@@ -129,6 +131,9 @@ export class NostrTorrent {
    * Get the nostr event for this torrent
    */
   toEvent(pubkey?: string) {
+    if (this.#event) {
+      return this.#event;
+    }
     const ret = {
       id: this.id,
       kind: 2003,
@@ -225,6 +230,8 @@ export class NostrTorrent {
       }
     }
 
-    return new NostrTorrent(ev.id, title, ev.content, infoHash, ev.created_at, files, trackers, tags);
+    let ret = new NostrTorrent(ev.id, title, ev.content, infoHash, ev.created_at, files, trackers, tags);
+    ret.#event = ev;
+    return ret;
   }
 }

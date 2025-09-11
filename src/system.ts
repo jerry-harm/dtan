@@ -14,7 +14,7 @@ const workerRelay = new WorkerRelayInterface(workerScript);
 
 export const WasmOptimizer = {
   ...DefaultOptimizer,
-  schnorrVerify: ev => {
+  schnorrVerify: (ev) => {
     return schnorr_verify_event(ev);
   },
 } as Optimizer;
@@ -42,7 +42,7 @@ export async function initSystem() {
     await workerRelay.init({
       databasePath: "dtan.db",
       insertBatchSize: 100,
-    })
+    });
   }
 
   await System.Init();

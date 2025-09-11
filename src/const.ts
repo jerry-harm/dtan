@@ -215,7 +215,7 @@ export const Categories = [
 ] as Array<Category>;
 
 export const TorrentKind = 2003 as EventKind;
-export const TorrentCommentKind = 2004 as EventKind;
+export const TorrentCommentKind = 1111 as EventKind;
 export const ZapKind = 9735 as EventKind;
 
 export function FormatBytes(b: number, f?: number) {

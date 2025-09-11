@@ -14,7 +14,13 @@ class RelaysStore extends ExternalStore<Array<string>> {
       if (import.meta.env.VITE_DTAN_SERVER) {
         this.#relays = [`${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}`];
       } else {
-        this.#relays = ["wss://nos.lol/", "wss://relay.damus.io/", "wss://relay.nostr.band/", "wss://relay.primal.net/", "wss://relay.snort.social/"];
+        this.#relays = [
+          "wss://nos.lol/",
+          "wss://relay.damus.io/",
+          "wss://relay.nostr.band/",
+          "wss://relay.primal.net/",
+          "wss://relay.snort.social/",
+        ];
       }
       this.#save();
     }

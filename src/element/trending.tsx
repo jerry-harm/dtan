@@ -1,52 +1,47 @@
-import { RequestBuilder } from "@snort/system";
-import { TorrentKind } from "../const";
+import { useMemo } from "react";
+import { TorrentTag } from "../nostr-torrent";
+import { EventKind, Nip10, RequestBuilder } from "@snort/system";
+import { TorrentCommentKind, TorrentKind } from "../const";
 import { useRequestBuilder } from "@snort/system-react";
+import { dedupe, removeUndefined } from "@snort/shared";
 import { TorrentList } from "./torrent-list";
-import useWoT from "../wot";
-import { useMemo, useState } from "react";
-import { Button } from "./button";
 
-export function LatestTorrents({ author }: { author?: string }) {
-  const sub = new RequestBuilder(`torrents:latest:${author}`);
-  sub
-    .withFilter()
-    .kinds([TorrentKind])
-    .authors(author ? [author] : undefined);
+export default function TrendingTorrents({ tag }: { tag: TorrentTag }) {
+  const rbReactions = useMemo(() => {
+    const rb = new RequestBuilder(`trending:${tag.type}:${tag.value}`);
+    rb.withFilter()
+      .kinds([TorrentCommentKind, EventKind.ZapReceipt, EventKind.Reaction, EventKind.Repost])
+      .tag("K", [TorrentKind.toString()]);
+    return rb;
+  }, [tag]);
 
-  const latest = useRequestBuilder(sub);
-  const [filterEnabled, setFilterEnabled] = useState(false);
-  const [maxDistance] = useState(2);
-  const wot = useWoT();
+  const dataReactions = useRequestBuilder(rbReactions);
 
-  const filteredTorrents = useMemo(() => {
-    if (!filterEnabled) {
-      return latest;
+  const eventIds = dedupe(
+    removeUndefined(dataReactions.map((e) => e.tags.find((z) => z[0] === "e" || z[0] === "E")?.[1])),
+  ).map((a) => {
+    const reactions = dataReactions.filter((r) => r.tags.find((t) => t[0] === "e")?.[1] === a).length;
+    return {
+      id: a,
+      reactions,
+    };
+  });
+  const rbTorrents = useMemo(() => {
+    const rb = new RequestBuilder(`trending:${tag.type}:${tag.value}:data`);
+    eventIds.sort((a, b) => (b.reactions > a.reactions ? 1 : -1));
+    const fx = rb
+      .withFilter()
+      .ids(eventIds.slice(0, 20).map((a) => a.id))
+      .kinds([TorrentKind]);
+    if (tag.type === "generic") {
+      fx.tag("t", [tag.value]);
+    } else {
+      fx.tag("i", [`${tag.type}:${tag.value}`]);
     }
-    // Filter by WoT distance
-    return latest.filter(torrent => {
-      const distance = wot.followDistance(torrent.pubkey);
-      return distance <= maxDistance;
-    });
-  }, [latest, filterEnabled, maxDistance, wot]);
+    return rb;
+  }, [eventIds]);
 
-  return (
-    <>
-      <h2>Latest Torrents</h2>
-      <div className="flex items-center gap-2 mb-4">
-        <Button
-          type={filterEnabled ? "primary" : "secondary"}
-          small
-          onClick={() => setFilterEnabled(!filterEnabled)}
-        >
-          {filterEnabled ? "WoT Filter: ON" : "WoT Filter: OFF"}
-        </Button>
-        {filterEnabled && (
-          <span className="text-sm text-neutral-400">
-            Filtering by Web of Trust (max distance: {maxDistance}, size: {wot.size()})
-          </span>
-        )}
-      </div>
-      <TorrentList items={filteredTorrents} />
-    </>
-  );
+  const dataTopEvents = useRequestBuilder(rbTorrents);
+
+  return <TorrentList items={dataTopEvents} showAll={true} />;
 }

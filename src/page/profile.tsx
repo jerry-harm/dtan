@@ -2,7 +2,7 @@ import { useUserProfile } from "@snort/system-react";
 import { Link, useParams } from "react-router-dom";
 import { ProfileImage } from "../element/profile-image";
 import { CachedMetadata, parseNostrLink } from "@snort/system";
-import { LatestTorrents } from "../element/trending";
+import { LatestTorrents } from "../element/latest";
 import { Text } from "../element/text";
 import { LoginState, useLogin } from "../login";
 import { Button } from "../element/button";

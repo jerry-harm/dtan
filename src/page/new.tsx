@@ -112,7 +112,10 @@ export function NewPage() {
       if ((fileListFiltered?.length ?? 0) > 100) {
         const remaining = fileListFiltered!.slice(100);
         fileListFiltered = fileListFiltered!.slice(0, 99);
-        fileListFiltered.push({ length: remaining?.reduce((acc, v) => acc += v.length, 0), path: [new TextEncoder().encode("Remaining")] });
+        fileListFiltered.push({
+          length: remaining?.reduce((acc, v) => (acc += v.length), 0),
+          path: [new TextEncoder().encode("Remaining")],
+        });
         console.debug("Truncated file list, too long!");
       }
 
@@ -121,10 +124,11 @@ export function NewPage() {
         desc: dec.decode(torrent["comment"] as Uint8Array | undefined) ?? "",
         btih: bytesToHex(sha1(infoBuf)),
         tcat: "",
-        files: fileListFiltered?.map((a) => ({
-          size: a.length,
-          name: a.path.map((b) => dec.decode(b)).join("/"),
-        })) ?? [],
+        files:
+          fileListFiltered?.map((a) => ({
+            size: a.length,
+            name: a.path.map((b) => dec.decode(b)).join("/"),
+          })) ?? [],
         trackers: dedupe([annouce, ...(announceList ?? [])]),
         externalLabels: [],
       });

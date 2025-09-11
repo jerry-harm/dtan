@@ -20,7 +20,7 @@ function wotOnSystem(system: SystemInterface) {
     followDistance: (pk: string) => sgi.getFollowDistance(pk),
     followedByCount: (pk: string) => sgi.followedByFriendsCount(pk),
     followedBy: (pk: string) => sgi.followedByFriends(pk),
-    size: () => sgi.size().users
+    size: () => sgi.size().users,
   };
 }
 

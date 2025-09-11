@@ -3,29 +3,109 @@ import { NostrLink, NostrPrefix, TaggedNostrEvent } from "@snort/system";
 import { FormatBytes } from "../const";
 import { Link } from "react-router-dom";
 import { Mention } from "./mention";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { NostrTorrent } from "../nostr-torrent";
 import MagnetIcon from "./icon/magnet";
+import IMDB from "../logo/IMDb_logo.svg";
+import { Button } from "./button";
+import useWoT from "../wot";
 
-export function TorrentList({ items }: { items: Array<TaggedNostrEvent> }) {
+export function TorrentList({ items, showAll = false }: { items: Array<TaggedNostrEvent>; showAll?: boolean }) {
+  const [pageSize, setPageSize] = useState(showAll ? 100_000 : 50);
+  const [pageNum, setPageNum] = useState(0);
+  const [filterEnabled, setFilterEnabled] = useState(false);
+  const [maxDistance] = useState(2);
+  const wot = useWoT();
+
+  const filteredTorrents = useMemo(() => {
+    if (!filterEnabled) {
+      return items;
+    }
+    // Filter by WoT distance
+    return items.filter((torrent) => {
+      const distance = wot.followDistance(torrent.pubkey);
+      return distance <= maxDistance;
+    });
+  }, [items, filterEnabled, maxDistance, wot]);
+
+  const totalPages = Math.ceil(filteredTorrents.length / pageSize);
+  const startIndex = pageNum * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, filteredTorrents.length);
+
   return (
-    <table className="torrent-list mb-8">
-      <thead>
-        <tr className="h-8">
-          <th className="rounded-tl-lg">Category</th>
-          <th>Name</th>
-          <th>Uploaded</th>
-          <th></th>
-          <th>Size</th>
-          <th className="rounded-tr-lg">From</th>
-        </tr>
-      </thead>
-      <tbody>
-        {items.map((a) => (
-          <TorrentTableEntry item={a} key={a.id} />
-        ))}
-      </tbody>
-    </table>
+    <>
+      {!showAll && (
+        <div className="flex items-center gap-2 mb-4">
+          <Button type={filterEnabled ? "primary" : "secondary"} small onClick={() => setFilterEnabled(!filterEnabled)}>
+            {filterEnabled ? "WoT Filter: ON" : "WoT Filter: OFF"}
+          </Button>
+          {filterEnabled && (
+            <span className="text-sm text-neutral-400">
+              Filtering by Web of Trust (max distance: {maxDistance}, size: {wot.size()})
+            </span>
+          )}
+        </div>
+      )}
+      <table className="torrent-list">
+        <thead>
+          <tr className="h-8">
+            <th className="rounded-tl-lg">Category</th>
+            <th>Name</th>
+            <th></th>
+            <th>Uploaded</th>
+            <th></th>
+            <th>Size</th>
+            <th className="rounded-tr-lg">From</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredTorrents.slice(pageNum * pageSize, pageNum * pageSize + pageSize).map((a) => (
+            <TorrentTableEntry item={a} key={a.id} />
+          ))}
+        </tbody>
+      </table>
+      {!showAll && (
+        <div className="flex items-center justify-between py-4">
+          <div className="text-sm text-neutral-400">
+            Showing {startIndex + 1}-{endIndex} of {filteredTorrents.length} torrents
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setPageNum(Math.max(0, pageNum - 1))}
+              disabled={pageNum === 0}
+              className="px-3 py-1 bg-indigo-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700"
+            >
+              Previous
+            </button>
+            <span className="text-sm text-neutral-400">
+              Page {pageNum + 1} of {totalPages}
+            </span>
+            <button
+              onClick={() => setPageNum(Math.min(totalPages - 1, pageNum + 1))}
+              disabled={pageNum >= totalPages - 1}
+              className="px-3 py-1 bg-indigo-600 text-white rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-indigo-700"
+            >
+              Next
+            </button>
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-neutral-400">Items per page:</label>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setPageNum(0);
+              }}
+              className="bg-neutral-800 text-white border border-neutral-600 rounded px-2 py-1 text-sm"
+            >
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -60,6 +140,13 @@ function TorrentTableEntry({ item }: { item: TaggedNostrEvent }) {
         <Link to={`/e/${NostrLink.fromEvent(item).encode()}`} state={item}>
           {torrent.title?.trim() || "Untitled"}
         </Link>
+      </td>
+      <td>
+        {torrent.imdb && (
+          <Link to={`/search?i=imdb:${torrent.imdb}`} title="IMDB title search">
+            <img src={IMDB} className="h-3" />
+          </Link>
+        )}
       </td>
       <td className="text-neutral-300">{new Date(torrent.publishedAt * 1000).toLocaleDateString()}</td>
       <td>

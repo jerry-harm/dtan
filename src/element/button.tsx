@@ -40,7 +40,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) =>
 
   const colorScheme = props.disabled
     ? "bg-neutral-900 text-neutral-600 border border-solid border-neutral-700"
-    : matchType(props.type)
+    : matchType(props.type);
 
   return (
     <button
@@ -48,7 +48,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) =>
       type="button"
       className={classNames(
         props.small ? "px-3 py-1 rounded-2xl" : "px-4 py-3 rounded-xl ",
-        "flex gap-1 items-center justify-center  whitespace-nowrap",
+        "flex gap-1 items-center justify-center  whitespace-nowrap cursor-pointer",
         colorScheme,
         props.className,
       )}

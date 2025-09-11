@@ -50,7 +50,7 @@ export function Layout() {
         <div className="grow"></div>
         <a href="https://github.com/v0l/dtan" target="_blank">
           <Button type="secondary">
-              <GithubIcon/>
+            <GithubIcon />
           </Button>
         </a>
         <Link to="/relays">
@@ -75,7 +75,8 @@ function LoggedInHeader({ pubkey }: { pubkey: string }) {
   return (
     <div className="flex items-center gap-2">
       <Link to={`/p/${NostrLink.publicKey(pubkey).encode()}`}>
-        <ProfileImage pubkey={pubkey} /></Link>
+        <ProfileImage pubkey={pubkey} />
+      </Link>
       <Link to="/new">
         <Button type="primary">+ Create</Button>
       </Link>

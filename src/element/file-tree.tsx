@@ -55,6 +55,10 @@ export default function TorrentFileList({ torrent }: { torrent: NostrTorrent }) 
     return ret;
   }, [torrent]);
 
+  function nodeSize(n: NodeTree): number {
+    return n.children.reduce((acc, v) => acc + (v.isDir ? nodeSize(v) : v.size), 0);
+  }
+
   function renderNode(n: NodeTree): React.ReactNode {
     if (n.isDir && n.name === "/") {
       // skip first node and just render children
@@ -63,21 +67,24 @@ export default function TorrentFileList({ torrent }: { torrent: NostrTorrent }) 
       return (
         <>
           <div
-            className="pl-1 flex gap-2 cursor-pointer"
+            className="pl-1 flex cursor-pointer justify-between items-center hover:bg-neutral-700"
             onClick={(e) => {
               // lazy stateless toggle
               e.currentTarget.nextElementSibling?.classList.toggle("hidden");
             }}
           >
-            <FolderIcon />
-            {n.name}
+            <div className="flex gap-2">
+              <FolderIcon />
+              {n.name}
+            </div>
+            <div>{FormatBytes(nodeSize(n))}</div>
           </div>
           <div className="pl-4 hidden">{n.children.sort((a) => (a.isDir ? -1 : 1)).map((b) => renderNode(b))}</div>
         </>
       );
     } else {
       return (
-        <div className="pl-1 flex justify-between items-center" key={n.name}>
+        <div className="pl-1 flex justify-between items-center hover:bg-neutral-700" key={n.name}>
           <div className="flex gap-2">
             <FileIcon />
             {n.name}
