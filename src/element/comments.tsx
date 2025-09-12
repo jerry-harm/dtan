@@ -82,6 +82,7 @@ function WriteComment({ ev }: { ev: TaggedNostrEvent }) {
   async function sendComment() {
     const e = await login?.builder.reply(ev, msg);
     console.debug(e);
+    setMsg("");
     if (e) {
       await login?.system.BroadcastEvent(e);
     }
