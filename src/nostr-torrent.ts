@@ -8,7 +8,7 @@ export interface TorrentFile {
 }
 
 export interface TorrentTag {
-  readonly type: "tcat" | "newznab" | "tmdb" | "ttvdb" | "imdb" | "mal" | "anilist" | "generic";
+  readonly type: "tcat" | "newznab" | "tmdb" | "ttvdb" | "imdb" | "mal" | "anilist" | "tpb" | "generic";
   readonly value: string;
 }
 
@@ -24,7 +24,7 @@ export class NostrTorrent {
     readonly files: Array<TorrentFile>,
     readonly trackers: Array<string>,
     readonly tags: Array<TorrentTag>,
-  ) {}
+  ) { }
 
   get newznab() {
     return this.#getTagValue("newznab");
@@ -124,6 +124,8 @@ export class NostrTorrent {
         }
         break;
       }
+      case "tpb":
+        return `https://thepiratebay.org/description.php?id=${tag.value}`;
     }
   }
 
