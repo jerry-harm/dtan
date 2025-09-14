@@ -32,11 +32,15 @@ export function TorrentTagElement({ tag }: { tag: TorrentTag }) {
           <a href={url} target="_blank" className="flex gap-2 items-center" title={`Open external link: ${url}`}>
             <img src={TPB} className="h-6 rounded-full" />
             <span>TPB</span>
-          </a>
+          </a>,
         );
       }
       default:
-        return wrap(<Link to={`/search/?tags=${tag.value}`} title="Search tag">#{tag.value}</Link>);
+        return wrap(
+          <Link to={`/search/?tags=${tag.value}`} title="Search tag">
+            #{tag.value}
+          </Link>,
+        );
     }
   }
 

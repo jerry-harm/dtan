@@ -9,8 +9,17 @@ import MagnetIcon from "./icon/magnet";
 import IMDB from "../logo/IMDb_logo.svg";
 import { Button } from "./button";
 import useWoT from "../wot";
+import DiamondIcon from "./icon/diamond";
 
-export function TorrentList({ items, showAll = false, currentInfoHash }: { items: Array<TaggedNostrEvent>; showAll?: boolean; currentInfoHash?: string }) {
+export function TorrentList({
+  items,
+  showAll = false,
+  currentInfoHash,
+}: {
+  items: Array<TaggedNostrEvent>;
+  showAll?: boolean;
+  currentInfoHash?: string;
+}) {
   const [pageSize, setPageSize] = useState(showAll ? 100_000 : 50);
   const [pageNum, setPageNum] = useState(0);
   const [filterEnabled, setFilterEnabled] = useState(false);
@@ -156,11 +165,19 @@ function TorrentTableEntry({ item, currentInfoHash }: { item: TaggedNostrEvent; 
           </Link>
         )}
       </td>
-      <td className="text-neutral-300">{new Date(torrent.publishedAt * 1000).toLocaleDateString()}</td>
+      <td className="text-neutral-300">{new Date(torrent.publishedAt * 1000).toLocaleString()}</td>
       <td>
-        <Link to={torrent.magnetLink}>
-          <MagnetIcon />
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link to={torrent.magnetLink} title="Magnet Link">
+            <MagnetIcon />
+          </Link>
+          {torrent.pow > 0 && (
+            <span title={`POW: ${torrent.pow}`} className="flex items-center text-xs gap-1">
+              <DiamondIcon size={16} />
+              <span>{torrent.pow}</span>
+            </span>
+          )}
+        </div>
       </td>
       <td className="whitespace-nowrap text-right text-neutral-300">{FormatBytes(torrent.totalSize)}</td>
       <td className="text-indigo-300 whitespace-nowrap break-words text-ellipsis">

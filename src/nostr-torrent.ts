@@ -24,7 +24,8 @@ export class NostrTorrent {
     readonly files: Array<TorrentFile>,
     readonly trackers: Array<string>,
     readonly tags: Array<TorrentTag>,
-  ) { }
+    readonly pow: number,
+  ) {}
 
   get newznab() {
     return this.#getTagValue("newznab");
@@ -175,6 +176,7 @@ export class NostrTorrent {
   static fromEvent(ev: NostrEvent) {
     let infoHash = "";
     let title = "";
+    let pow = 0;
     const files: Array<TorrentFile> = [];
     const trackers: Array<string> = [];
     const tags: Array<TorrentTag> = [];
@@ -229,10 +231,17 @@ export class NostrTorrent {
           });
           break;
         }
+        case "nonce": {
+          const pv = parseInt(t[2]);
+          if (!isNaN(pv)) {
+            pow = pv;
+          }
+          break;
+        }
       }
     }
 
-    let ret = new NostrTorrent(ev.id, title, ev.content, infoHash, ev.created_at, files, trackers, tags);
+    let ret = new NostrTorrent(ev.id, title, ev.content, infoHash, ev.created_at, files, trackers, tags, pow);
     ret.#event = ev;
     return ret;
   }
