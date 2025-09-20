@@ -43,6 +43,9 @@ export async function initSystem() {
       databasePath: "dtan.db",
       insertBatchSize: 100,
     });
+    await workerRelay.configureSearchIndex({
+      2003: ["title", "file"], // index torrent titles and filenames (content is always indexed)
+    });
   }
 
   await System.Init();

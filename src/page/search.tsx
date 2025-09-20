@@ -1,41 +1,36 @@
 import { RequestBuilder } from "@snort/system";
 import { useRequestBuilder } from "@snort/system-react";
-import { useLocation, useParams } from "react-router-dom";
 import { TorrentKind } from "../const";
 import { TorrentList } from "../element/torrent-list";
 import { useRelays } from "../relays";
 import { useMemo } from "react";
+import useSearch from "../hooks/search";
 
 export function SearchPage() {
-  const params = useParams();
-  const location = useLocation();
-  const term = params.term as string | undefined;
-  const q = new URLSearchParams(location.search ?? "");
-  const tags = q.get("tags")?.split(",") ?? [];
-  const iz = q.getAll("i");
+  const { term, tags, labels } = useSearch();
   const { relays } = useRelays();
 
   const rb = useMemo(() => {
     const q = location.search;
-    const rb = new RequestBuilder(`search:${q}`);
+    const rb = new RequestBuilder(`search:${q}+${term}`);
     const f = rb
       .withFilter()
       .relay(["wss://relay.nostr.band", "wss://relay.noswhere.com", ...relays])
       .kinds([TorrentKind]);
-    if (term || tags.length > 0 || iz.length > 0) {
+    if (term || tags.length > 0 || labels.length > 0) {
       f.limit(100);
     }
     if (term) {
-      f.search(term);
+      f.search(`${term.replaceAll(" ", "+")}*`);
     }
     if (tags.length > 0) {
       f.tag("t", tags);
     }
-    if (iz.length > 0) {
-      f.tag("i", iz);
+    if (labels.length > 0) {
+      f.tag("i", labels);
     }
     return rb;
-  }, [params]);
+  }, [term, tags, labels]);
 
   const data = useRequestBuilder(rb);
 

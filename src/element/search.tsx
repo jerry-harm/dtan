@@ -1,15 +1,17 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import useSearch from "../hooks/search";
 
-export function Search(params: { term?: string; tags?: Array<string> }) {
+export function Search() {
   const navigate = useNavigate();
+  const { term: qTerm, tags: qTags } = useSearch();
   const [term, setTerm] = useState("");
   const [tags, setTags] = useState<Array<string>>([]);
 
   useEffect(() => {
-    setTerm(params.term ?? "");
-    setTags(params.tags ?? []);
-  }, [params]);
+    setTerm(qTerm ?? "");
+    setTags(qTags ?? []);
+  }, [qTerm, qTags]);
 
   return (
     <input

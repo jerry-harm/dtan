@@ -15,7 +15,7 @@
     "@snort/system": "^1.6.8",
     "@snort/system-react": "^1.6.8",
     "@snort/system-wasm": "^1.0.5",
-    "@snort/worker-relay": "^1.4.1",
+    "@snort/worker-relay": "^1.5.0",
     "classnames": "^2.5.1",
     "qr-code-styling": "^1.9.2",
     "react": "^19.1.0",
