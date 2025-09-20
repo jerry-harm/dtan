@@ -125,13 +125,12 @@ function TagList({ torrent }: { torrent: NostrTorrent }) {
 }
 
 function TagListEntry({ tags, startIndex, tag }: { tags: string[]; startIndex: number; tag: string }) {
-  const tagUrl = useMemo(() => {
-    return encodeURIComponent(tags.slice(0, startIndex + 1).join(","));
-  }, [tags, startIndex]);
+  const tagUrl = encodeURIComponent(tags.slice(0, startIndex + 1).join(","));
+  const isTCat = tags.length === startIndex + 1;
 
   return (
     <>
-      <Link to={`/search/?tags=${tagUrl}`}>{tag}</Link>
+      <Link to={`/search/?${!isTCat ? `tags=${tagUrl}` : `i=tcat:${tagUrl}`}`}>{tag}</Link>
       {tags.length !== startIndex + 1 && " > "}
     </>
   );
