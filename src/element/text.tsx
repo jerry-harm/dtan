@@ -1,5 +1,5 @@
 import { ParsedFragment, transformText, tryParseNostrLink } from "@snort/system";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Mention } from "./mention";
 import { Link } from "react-router-dom";
 
@@ -9,7 +9,7 @@ export function Text({ content, tags, wrap = true }: { content: string; tags: Ar
   function renderFrag(f: ParsedFragment, index: number) {
     switch (f.type) {
       case "media":
-        return <img key={index} src={f.content} style={{ maxHeight: "50vh" }} />;
+        return <ImageFrag key={index} url={f.content} />;
       case "mention":
       case "link": {
         const nostrLink = tryParseNostrLink(f.content);
@@ -33,4 +33,18 @@ export function Text({ content, tags, wrap = true }: { content: string; tags: Ar
     return <div className="text">{frags.map(renderFrag)}</div>;
   }
   return frags.map(renderFrag);
+}
+
+function ImageFrag({ url }: { url: string }) {
+  const [error, setError] = useState(false);
+
+  // use plain link if image preview fails
+  if (error) {
+    return (
+      <Link to={url} target="_blank" className="text-indigo-300" rel="noopener noreferrer">
+        {url}
+      </Link>
+    );
+  }
+  return <img src={url} alt={url} style={{ maxHeight: "250px" }} onError={() => setError(true)} />;
 }

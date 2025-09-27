@@ -30,7 +30,6 @@ async function openFile(): Promise<File | undefined> {
   });
 }
 
-
 type TorrentEntry = {
   name: string;
   desc: string;
