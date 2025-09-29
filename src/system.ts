@@ -5,7 +5,7 @@ import WorkerVite from "@snort/worker-relay/src/worker?worker";
 
 import WasmPath from "@snort/system-wasm/pkg/system_wasm_bg.wasm?url";
 
-const hasWasm = "WebAssembly" in globalThis;
+const hasWasm = import.meta.env.VITE_DISABLE_WASM ? false:"WebAssembly" in globalThis ;
 
 const workerScript = import.meta.env.DEV
   ? new URL("@snort/worker-relay/dist/esm/worker.mjs", import.meta.url)
